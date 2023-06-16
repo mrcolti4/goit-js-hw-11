@@ -1,24 +1,26 @@
 import axios from 'axios';
-import { refs } from './refs';
-import SimpleLightbox from 'simplelightbox';
-
-const BASE_URL = 'https://pixabay.com/api/';
-const API_KEY = '14105268-ecf4e682ff6d4e09bd701cb73';
 
 export class PixabayApi {
+  #BASE_URL = 'https://pixabay.com/api/';
+  #API_KEY = '14105268-ecf4e682ff6d4e09bd701cb73';
   constructor() {
     this.page = 1;
-    this.imageType = 'photo';
-    this.safesearch = true;
-    this.orientation = 'horizontal';
     this.perPage = 40;
     this.query = '';
     this.totalHits = 0;
   }
   async getImages() {
-    const res = await axios.get(
-      `${BASE_URL}?key=${API_KEY}&q=${this.query}&image_type=${this.imageType}&safesearch=${this.safesearch}&orientation=${this.orientation}&per_page=${this.perPage}&page=${this.page}`
-    );
+    const res = await axios.get(`${this.#BASE_URL}?`, {
+      params: {
+        image_type: 'photo',
+        orientation: 'horizontal',
+        q: this.query,
+        page: this.page,
+        per_page: this.perPage,
+        key: this.#API_KEY,
+        safesearch: true,
+      },
+    });
     this.totalHits = res.data.totalHits;
     return res.data;
   }

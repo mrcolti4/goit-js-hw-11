@@ -16,4 +16,12 @@ export class MessageApi {
   static onNetworkError() {
     Notify.failure('Problems with network. Please try again.');
   }
+
+  static showTotalFound(totalFound) {
+    Notify.success(`Hooray! We found ${totalFound} images.`);
+  }
+
+  static onEmptyInput() {
+    Notify.warning('We cant find images with empty input');
+  }
 }

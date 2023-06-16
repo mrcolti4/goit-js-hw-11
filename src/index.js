@@ -1,17 +1,43 @@
 import { PixabayApi } from './js/pixabay-api.js';
 import { refs } from './js/refs.js';
 import { MessageApi } from './js/messages-api.js';
+import simpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const PixabayAPI = new PixabayApi();
 let imageGallery = new SimpleLightbox('.gallery .photo-card a');
 
 function hideBtn() {
-  refs.loadMoreBtn.hidden = true;
+  refs.loadMoreBtn.classList.add('hidden');
 }
 
 function showBtn() {
-  refs.loadMoreBtn.hidden = false;
+  refs.loadMoreBtn.classList.remove('hidden');
+}
+
+function onLoadScroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
+
+function onLastPage(totalHits) {
+  const currentPage = PixabayAPI.page;
+  const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
+  if (currentPage === 1) {
+    MessageApi.showTotalFound(totalHits);
+    return;
+  }
+  if (maxPage === currentPage) {
+    console.log(maxPage, currentPage);
+    hideBtn();
+    MessageApi.showWarning();
+  }
 }
 
 function clearGallery() {
@@ -58,17 +84,15 @@ function generateMarkUp({
 
 async function fetchImages() {
   try {
+    hideBtn();
     const { hits, totalHits } = await PixabayAPI.getImages();
     if (totalHits == 0) {
       MessageApi.showError();
+      return;
     }
-    const currentPage = PixabayAPI.page;
-    const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
+
     showBtn();
-    if (maxPage === currentPage) {
-      hideBtn();
-      MessageApi.showWarning();
-    }
+    onLastPage(totalHits);
     return hits.reduce(
       (markup, currentImg) => markup + generateMarkUp(currentImg),
       ''
@@ -86,22 +110,22 @@ async function formHandler(e) {
   e.preventDefault();
   clearGallery();
   PixabayAPI.resetPage();
+
   const inputValue = refs.form.elements[0].value;
   PixabayAPI.query = inputValue;
+
+  if (!inputValue) {
+    MessageApi.onEmptyInput();
+    return;
+  }
+
   await showImages();
 }
 
 async function onClickLoadMore(e) {
   PixabayAPI.incrementPage();
   await showImages();
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
-
-  window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-  });
+  onLoadScroll();
 }
 
 refs.form.addEventListener('submit', formHandler);
