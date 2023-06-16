@@ -29,7 +29,7 @@ function onLoadScroll() {
 function onLastPage(totalHits) {
   const currentPage = PixabayAPI.page;
   const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
-  if (currentPage === 1) {
+  if (maxPage === 1) {
     MessageApi.showTotalFound(totalHits);
     hideBtn();
     return;
