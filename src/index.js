@@ -31,10 +31,10 @@ function onLastPage(totalHits) {
   const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
   if (currentPage === 1) {
     MessageApi.showTotalFound(totalHits);
+    hideBtn();
     return;
   }
   if (maxPage === currentPage) {
-    console.log(maxPage, currentPage);
     hideBtn();
     MessageApi.showWarning();
   }
