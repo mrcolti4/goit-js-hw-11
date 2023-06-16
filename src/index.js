@@ -29,7 +29,6 @@ function onLoadScroll() {
 function onLastPage(totalHits) {
   const currentPage = PixabayAPI.page;
   const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
-  console.log(maxPage, currentPage);
 
   if (maxPage === currentPage) {
     hideBtn();
@@ -122,7 +121,6 @@ async function formHandler(e) {
 
   if (maxPage === 1) {
     hideBtn();
-    console.log(maxPage);
     return;
   }
   showBtn();
