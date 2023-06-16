@@ -29,11 +29,8 @@ function onLoadScroll() {
 function onLastPage(totalHits) {
   const currentPage = PixabayAPI.page;
   const maxPage = Math.ceil(totalHits / PixabayAPI.perPage);
-  if (maxPage === 1) {
-    MessageApi.showTotalFound(totalHits);
-    hideBtn();
-    return;
-  }
+  console.log(maxPage, currentPage);
+
   if (maxPage === currentPage) {
     hideBtn();
     MessageApi.showWarning();
@@ -86,13 +83,7 @@ async function fetchImages() {
   try {
     hideBtn();
     const { hits, totalHits } = await PixabayAPI.getImages();
-    if (totalHits == 0) {
-      MessageApi.showError();
-      return;
-    }
-
     showBtn();
-    onLastPage(totalHits);
     return hits.reduce(
       (markup, currentImg) => markup + generateMarkUp(currentImg),
       ''
@@ -108,9 +99,6 @@ function insertImages(images) {
 
 async function formHandler(e) {
   e.preventDefault();
-  clearGallery();
-  PixabayAPI.resetPage();
-
   const inputValue = refs.form.elements[0].value;
   PixabayAPI.query = inputValue;
 
@@ -118,14 +106,33 @@ async function formHandler(e) {
     MessageApi.onEmptyInput();
     return;
   }
+  clearGallery();
+  PixabayAPI.resetPage();
 
   await showImages();
+
+  if (PixabayAPI.totalHits == 0) {
+    MessageApi.showError();
+    hideBtn();
+    return;
+  }
+
+  MessageApi.showTotalFound(PixabayAPI.totalHits);
+  const maxPage = Math.ceil(PixabayAPI.totalHits / PixabayAPI.perPage);
+
+  if (maxPage === 1) {
+    hideBtn();
+    console.log(maxPage);
+    return;
+  }
+  showBtn();
 }
 
 async function onClickLoadMore(e) {
   PixabayAPI.incrementPage();
   await showImages();
   onLoadScroll();
+  onLastPage(PixabayAPI.totalHits);
 }
 
 refs.form.addEventListener('submit', formHandler);
